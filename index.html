@@ -698,6 +698,162 @@
             font-size: 0.85rem;
             color: rgba(255, 255, 255, 0.8);
         }
+
+        /* Custom Color Picker */
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .color-trigger {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            background-color: #1a1a2e;
+        }
+
+        .color-value {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            width: 100px;
+            font-family: monospace;
+        }
+
+        .custom-color-popup {
+            position: absolute;
+            top: 110%;
+            left: 0;
+            background: #1a1a2e;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            z-index: 100;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 280px;
+            display: none;
+        }
+
+        .custom-color-popup.visible {
+            display: block;
+        }
+
+        .picker-saturation {
+            width: 100%;
+            height: 180px;
+            position: relative;
+            background: red;
+            /* Dynamic hue */
+            margin-bottom: 15px;
+            border-radius: 8px;
+            cursor: crosshair;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .picker-saturation-white {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to right, #fff, rgba(255, 255, 255, 0));
+        }
+
+        .picker-saturation-black {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to top, #000, rgba(0, 0, 0, 0));
+        }
+
+        .picker-cursor {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+            transform: translate(-50%, -50%);
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .picker-hue {
+            width: 100%;
+            height: 24px;
+            border-radius: 12px;
+            background: linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+            position: relative;
+            margin-bottom: 20px;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .picker-hue-cursor {
+            position: absolute;
+            width: 12px;
+            height: 100%;
+            background: #fff;
+            border: 2px solid rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            transform: translateX(-50%);
+            top: 0;
+            left: 0%;
+            pointer-events: none;
+        }
+
+        .picker-presets {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .preset-color {
+            aspect-ratio: 1;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .preset-color:hover {
+            transform: scale(1.1);
+            z-index: 1;
+        }
+
+        .picker-footer {
+            text-align: right;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 10px;
+        }
+
+        .picker-close {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #fff;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+        }
+
+        .picker-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
     </style>
 </head>
 
@@ -770,12 +926,39 @@
                 <div class="option-group">
                     <label class="option-label">背景色を選択</label>
                     <div class="color-picker-wrapper">
-                        <input type="color" class="color-picker" id="bgColor" value="#1a1a2e">
+                        <div class="color-trigger" id="colorTrigger"></div>
+                        <input type="hidden" id="bgColor" value="#1a1a2e">
                         <input type="text" class="color-value" id="colorValue" value="#1a1a2e">
                         <button class="eyedropper-btn" id="eyedropperBtn" title="画面から色を取得">
                             <span class="icon">💉</span>
                             <span>スポイト</span>
                         </button>
+
+                        <!-- Custom Color Picker Popup -->
+                        <div class="custom-color-popup" id="customColorPicker">
+                            <div class="picker-saturation" id="pickerSaturation">
+                                <div class="picker-saturation-white"></div>
+                                <div class="picker-saturation-black"></div>
+                                <div class="picker-cursor" id="pickerCursor"></div>
+                            </div>
+                            <div class="picker-hue" id="pickerHueTrack">
+                                <div class="picker-hue-cursor" id="pickerHueCursor"></div>
+                            </div>
+                            <div class="picker-presets">
+                                <div class="preset-color" style="background:#ff0000" data-color="#ff0000"></div>
+                                <div class="preset-color" style="background:#00ff00" data-color="#00ff00"></div>
+                                <div class="preset-color" style="background:#0000ff" data-color="#0000ff"></div>
+                                <div class="preset-color" style="background:#ffff00" data-color="#ffff00"></div>
+                                <div class="preset-color" style="background:#00ffff" data-color="#00ffff"></div>
+                                <div class="preset-color" style="background:#ff00ff" data-color="#ff00ff"></div>
+                                <div class="preset-color" style="background:#ffffff" data-color="#ffffff"></div>
+                                <div class="preset-color" style="background:#000000" data-color="#000000"></div>
+                                <div class="preset-color" style="background:#1a1a2e" data-color="#1a1a2e"></div>
+                            </div>
+                            <div class="picker-footer">
+                                <button class="picker-close" id="pickerCloseBtn">閉じる</button>
+                            </div>
+                        </div>
                     </div>
                     <p class="info-text" id="eyedropperInfo">スポイトで画面上の色をクリックして取得できます</p>
                 </div>
@@ -1480,8 +1663,241 @@
             updateFormatUI();
         }
 
+
+        // Custom Color Picker Logic
+        function setupCustomColorPicker() {
+            const trigger = document.getElementById('colorTrigger');
+            const popup = document.getElementById('customColorPicker');
+            const closeBtn = document.getElementById('pickerCloseBtn');
+            const saturationArea = document.getElementById('pickerSaturation');
+            const hueArea = document.getElementById('pickerHueTrack');
+            const bgColorInput = document.getElementById('bgColor');
+            const colorValueInput = document.getElementById('colorValue');
+            const presets = document.querySelectorAll('.preset-color');
+
+            let state = { h: 0, s: 0, v: 100 };
+            let isDraggingSat = false;
+            let isDraggingHue = false;
+
+            // Toggle popup
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const rect = trigger.getBoundingClientRect();
+                // Check if popup goes off screen (simple check)
+                if (window.innerHeight - rect.bottom < 300) {
+                    popup.style.top = 'auto';
+                    popup.style.bottom = '110%';
+                } else {
+                    popup.style.top = '110%';
+                    popup.style.bottom = 'auto';
+                }
+                popup.classList.toggle('visible');
+                if (popup.classList.contains('visible')) {
+                    initColor();
+                }
+            });
+
+            closeBtn.addEventListener('click', () => popup.classList.remove('visible'));
+
+            // Close when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!popup.contains(e.target) && e.target !== trigger) {
+                    popup.classList.remove('visible');
+                }
+            });
+
+            // Presets
+            presets.forEach(preset => {
+                preset.addEventListener('click', () => {
+                    const color = preset.dataset.color;
+                    setColor(color);
+                });
+            });
+
+            // Saturation/Value Drag
+            saturationArea.addEventListener('mousedown', (e) => {
+                isDraggingSat = true;
+                updateSatVal(e);
+            });
+            window.addEventListener('mousemove', (e) => {
+                if (isDraggingSat) updateSatVal(e);
+                if (isDraggingHue) updateHue(e);
+            });
+            window.addEventListener('mouseup', () => {
+                isDraggingSat = false;
+                isDraggingHue = false;
+            });
+
+            // Touch support
+            saturationArea.addEventListener('touchstart', (e) => {
+                isDraggingSat = true;
+                updateSatVal(e.touches[0]);
+                e.preventDefault(); // Prevent scrolling
+            }, { passive: false });
+            window.addEventListener('touchmove', (e) => {
+                if (isDraggingSat) {
+                    updateSatVal(e.touches[0]);
+                    e.preventDefault();
+                }
+                if (isDraggingHue) {
+                    updateHue(e.touches[0]);
+                    e.preventDefault();
+                }
+            }, { passive: false });
+            window.addEventListener('touchend', () => {
+                isDraggingSat = false;
+                isDraggingHue = false;
+            });
+
+            // Hue Drag
+            hueArea.addEventListener('mousedown', (e) => {
+                isDraggingHue = true;
+                updateHue(e);
+            });
+            hueArea.addEventListener('touchstart', (e) => {
+                isDraggingHue = true;
+                updateHue(e.touches[0]);
+                e.preventDefault();
+            }, { passive: false });
+
+            function updateSatVal(e) {
+                const rect = saturationArea.getBoundingClientRect();
+                let x = Math.max(0, Math.min(100, (e.clientX - rect.left) / rect.width * 100));
+                let y = Math.max(0, Math.min(100, (e.clientY - rect.top) / rect.height * 100));
+
+                state.s = x;
+                state.v = 100 - y;
+                updateUI();
+            }
+
+            function updateHue(e) {
+                const rect = hueArea.getBoundingClientRect();
+                let x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                state.h = x * 360;
+                updateUI();
+            }
+
+            function initColor() {
+                const hex = bgColorInput.value;
+                const rgb = hexToRgb(hex);
+                if (rgb) {
+                    const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
+                    state = hsv;
+                    updateUI(true); // true = skip input update to avoid loop
+                }
+            }
+
+            function setColor(hex) {
+                const rgb = hexToRgb(hex);
+                if (rgb) {
+                    const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
+                    state = hsv;
+                    updateUI();
+                }
+            }
+
+            function updateUI(skipInput = false) {
+                // Update saturation area background
+                const hueColor = hsvToRgb(state.h, 100, 100);
+                saturationArea.style.backgroundColor = `rgb(${hueColor.r}, ${hueColor.g}, ${hueColor.b})`;
+
+                // Update cursors
+                const satCursor = document.getElementById('pickerCursor');
+                satCursor.style.left = state.s + '%';
+                satCursor.style.top = (100 - state.v) + '%';
+
+                const hueCursor = document.getElementById('pickerHueCursor');
+                hueCursor.style.left = (state.h / 360 * 100) + '%';
+
+                // Calculate final color
+                const rgb = hsvToRgb(state.h, state.s, state.v);
+                const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+
+                trigger.style.backgroundColor = hex;
+                if (!skipInput && document.activeElement !== colorValueInput) {
+                    colorValueInput.value = hex;
+                }
+
+                if (bgColorInput.value !== hex) {
+                    bgColorInput.value = hex;
+                    // Trigger process image manually since hidden input doesn't trigger change
+                    if (originalImage) processImage();
+                }
+            }
+
+            // Manual value input
+            colorValueInput.addEventListener('change', () => {
+                if (/^#[0-9A-Fa-f]{6}$/.test(colorValueInput.value)) {
+                    setColor(colorValueInput.value);
+                }
+            });
+
+            // Initialize once
+            initColor();
+        }
+
+        // Color Helpers
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function rgbToHex(r, g, b) {
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        }
+
+        function rgbToHsv(r, g, b) {
+            r /= 255; g /= 255; b /= 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, v = max;
+            const d = max - min;
+            s = max === 0 ? 0 : d / max;
+
+            if (max === min) {
+                h = 0;
+            } else {
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+            return { h: h * 360, s: s * 100, v: v * 100 };
+        }
+
+        function hsvToRgb(h, s, v) {
+            let r, g, b;
+            const i = Math.floor(h / 60);
+            const f = h / 60 - i;
+            const p = v * (1 - s / 100) / 100;
+            const q = v * (1 - f * s / 100) / 100;
+            const t = v * (1 - (1 - f) * s / 100) / 100;
+            v /= 100;
+
+            switch (i % 6) {
+                case 0: r = v; g = t; b = p; break;
+                case 1: r = q; g = v; b = p; break;
+                case 2: r = p; g = v; b = t; break;
+                case 3: r = p; g = q; b = v; break;
+                case 4: r = t; g = p; b = v; break;
+                case 5: r = v; g = p; b = q; break;
+            }
+
+            return {
+                r: Math.round(r * 255),
+                g: Math.round(g * 255),
+                b: Math.round(b * 255)
+            };
+        }
+
         // Initialize
         init();
+        setupCustomColorPicker();
     </script>
 </body>
 
