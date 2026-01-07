@@ -209,25 +209,177 @@
 
         .preview-section {
             display: none;
-            gap: 30px;
             margin-bottom: 30px;
         }
 
         .preview-section.visible {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: block;
         }
 
         @media (max-width: 768px) {
-            .preview-section.visible {
-                grid-template-columns: 1fr;
+            .upload-section {
+                padding: 24px;
             }
+
+            .color-picker {
+                width: 50px;
+                height: 50px;
+            }
+        }
+
+        /* Paste button for mobile */
+        .paste-btn {
+            display: none;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 20px;
+            color: #fff;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .paste-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .paste-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+            }
+        }
+
+        /* Mobile crop container */
+        .mobile-crop-container {
+            display: none;
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+            border-radius: 10px;
+            background: #222;
+            touch-action: none;
+        }
+
+        .mobile-crop-container.visible {
+            display: block;
+        }
+
+        .mobile-crop-image {
+            position: absolute;
+            transform-origin: center center;
+        }
+
+        .mobile-crop-frame {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6);
+            border: 2px solid #00d4ff;
+            pointer-events: none;
+        }
+
+        /* Custom color picker */
+        .custom-color-picker {
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .custom-color-picker.visible {
+            display: flex;
+        }
+
+        .color-presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .color-preset {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .color-preset:hover,
+        .color-preset.active {
+            border-color: #00d4ff;
+            transform: scale(1.1);
+        }
+
+        .color-sliders {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .color-slider-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .color-slider-label {
+            width: 20px;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .color-slider {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .color-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            border: 2px solid rgba(0, 0, 0, 0.3);
+        }
+
+        .color-slider-r {
+            background: linear-gradient(to right, #000, #f00);
+        }
+
+        .color-slider-g {
+            background: linear-gradient(to right, #000, #0f0);
+        }
+
+        .color-slider-b {
+            background: linear-gradient(to right, #000, #00f);
+        }
+
+        .color-preview-box {
+            width: 60px;
+            height: 40px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
         }
 
         .preview-box {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 15px;
             padding: 20px;
+            margin: 0 auto;
+            max-width: 500px;
         }
 
         .preview-title {
@@ -245,6 +397,8 @@
             justify-content: center;
             align-items: center;
             min-height: 200px;
+            max-width: 400px;
+            margin: 0 auto;
             background: repeating-conic-gradient(#333 0% 25%, #444 0% 50%) 50% / 20px 20px;
             border-radius: 10px;
             overflow: hidden;
@@ -262,9 +416,19 @@
             background: #222;
         }
 
+        /* Unified crop frame - works for both PC and mobile */
         .output-container {
             aspect-ratio: 1 / 1;
             max-height: 400px;
+            max-width: 400px;
+            margin: 0 auto;
+            position: relative;
+            touch-action: none;
+            cursor: grab;
+        }
+
+        .output-container:active {
+            cursor: grabbing;
         }
 
         .output-container canvas {
@@ -273,61 +437,21 @@
             object-fit: contain;
         }
 
-        /* Crop controls */
-        .crop-container {
-            position: relative;
-            display: inline-block;
-        }
-
-        .crop-overlay {
+        .crop-frame {
+            display: none;
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-
-        .crop-box {
-            position: absolute;
-            border: 3px solid #00d4ff;
-            background: rgba(0, 212, 255, 0.1);
-            cursor: move;
-            pointer-events: all;
+            top: 10%;
+            left: 10%;
+            right: 10%;
+            bottom: 10%;
+            border: 2px solid #00d4ff;
             box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+            z-index: 10;
         }
 
-        .crop-handle {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background: #00d4ff;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            cursor: nwse-resize;
-            pointer-events: all;
-        }
-
-        .crop-handle.top-left {
-            top: 0;
-            left: 0;
-        }
-
-        .crop-handle.top-right {
-            top: 0;
-            left: 100%;
-            cursor: nesw-resize;
-        }
-
-        .crop-handle.bottom-left {
-            top: 100%;
-            left: 0;
-            cursor: nesw-resize;
-        }
-
-        .crop-handle.bottom-right {
-            top: 100%;
-            left: 100%;
+        .crop-frame.visible {
+            display: block;
         }
 
         .action-buttons {
@@ -469,38 +593,47 @@
             font-weight: 500;
         }
 
-        .size-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .size-option {
+        /* Dropdown select styles */
+        .setting-select {
             background: rgba(255, 255, 255, 0.1);
             border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 8px;
-            padding: 8px 14px;
+            padding: 10px 14px;
             color: #fff;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             cursor: pointer;
             transition: all 0.3s ease;
+            width: 100%;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
         }
 
-        .size-option:hover {
-            background: rgba(255, 255, 255, 0.15);
+        .setting-select:hover {
+            background-color: rgba(255, 255, 255, 0.15);
             border-color: rgba(255, 255, 255, 0.4);
         }
 
-        .size-option.active {
-            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
-            border-color: transparent;
+        .setting-select:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+
+        .setting-select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+
+        .sub-select {
+            margin-top: 8px;
         }
 
         .custom-size-input {
-            display: none;
             align-items: center;
             gap: 10px;
-            margin-top: 10px;
+            margin-top: 8px;
         }
 
         .custom-size-input.visible {
@@ -508,7 +641,7 @@
         }
 
         .custom-size-input input {
-            width: 100px;
+            width: 120px;
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 8px;
@@ -528,46 +661,8 @@
             font-size: 0.85rem;
         }
 
-        .format-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .format-option {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            padding: 8px 14px;
-            color: #fff;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .format-option:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-
-        .format-option.active {
-            background: linear-gradient(135deg, #7b2cbf, #5a1f99);
-            border-color: transparent;
-        }
-
-        .format-badge {
-            font-size: 0.7rem;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 2px 6px;
-            border-radius: 4px;
-            text-transform: uppercase;
-        }
 
         .quality-slider-wrapper {
-            display: none;
             margin-top: 10px;
         }
 
@@ -614,36 +709,24 @@
         <div class="upload-section" id="uploadSection">
             <div class="upload-icon">📁</div>
             <div class="upload-text">
-                クリックしてファイルを選択、または<span>ドラッグ＆ドロップ</span><br>
-                <small>Ctrl+V でクリップボードから貼り付けも可能</small>
+                クリック/タップしてファイルを選択、または<span>ドラッグ＆ドロップ</span>
             </div>
+            <button class="paste-btn" id="pasteBtn">📋 クリップボードから貼り付け</button>
             <input type="file" id="fileInput" accept="image/*">
         </div>
 
-        <!-- Preview Section (moved above mode selector) -->
+        <!-- Preview Section - Unified output preview only -->
         <div class="preview-section" id="previewSection">
             <div class="preview-box">
-                <div class="preview-title">📥 元画像</div>
-                <div class="preview-image-container" id="originalContainer">
-                    <div class="crop-container" id="cropContainer">
-                        <img id="originalImage" src="" alt="Original">
-                        <div class="crop-overlay" id="cropOverlay">
-                            <div class="crop-box" id="cropBox">
-                                <div class="crop-handle top-left" data-handle="tl"></div>
-                                <div class="crop-handle top-right" data-handle="tr"></div>
-                                <div class="crop-handle bottom-left" data-handle="bl"></div>
-                                <div class="crop-handle bottom-right" data-handle="br"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="preview-box">
-                <div class="preview-title">📤 出力プレビュー</div>
-                <div class="preview-image-container output-container">
+                <div class="preview-title">🖼️ 出力プレビュー</div>
+                <div class="preview-image-container output-container" id="outputContainer">
                     <canvas id="outputCanvas"></canvas>
+                    <div class="crop-frame" id="cropFrame"></div>
                 </div>
+                <p class="info-text" id="cropInfo" style="margin-top:10px;">ドラッグで移動、ピンチまたはホイールで拡大縮小</p>
             </div>
+            <!-- Hidden original image for reference -->
+            <img id="originalImage" src="" alt="Original" style="display:none;">
         </div>
 
         <!-- Mode Selector (hidden until image loaded) -->
@@ -666,7 +749,11 @@
         <div class="options-panel" id="optionsPanel">
             <!-- Crop Options -->
             <div id="cropOptions" class="option-content">
-                <p class="info-text">画像上で切り抜き範囲をドラッグして調整できます</p>
+                <div class="option-group">
+                    <label class="option-label">🔍 ズーム</label>
+                    <input type="range" class="blur-slider" id="cropZoomSlider" min="80" max="300" value="80">
+                    <span class="slider-value" id="cropZoomValue">1.0x</span>
+                </div>
             </div>
 
             <!-- Blur Options -->
@@ -702,56 +789,44 @@
                 <!-- Size Settings -->
                 <div class="setting-group">
                     <label class="setting-label">📐 出力サイズ</label>
-                    <div class="size-options" id="sizeOptions">
-                        <button class="size-option active" data-size="original">オリジナル</button>
-                        <button class="size-option" data-size="256">256px</button>
-                        <button class="size-option" data-size="512">512px</button>
-                        <button class="size-option" data-size="1024">1024px</button>
-                        <button class="size-option" data-size="2048">2048px</button>
-                        <button class="size-option" data-size="4096">4096px</button>
-                        <button class="size-option" data-size="custom">カスタム</button>
-                    </div>
-                    <div class="custom-size-input" id="customSizeInput">
+                    <select class="setting-select" id="sizeTypeSelect">
+                        <option value="original">オリジナル</option>
+                        <option value="preset">主要サイズ</option>
+                        <option value="custom">カスタム</option>
+                    </select>
+                    <span class="original-size-info" id="originalSizeInfo"
+                        style="display:none; margin-top:8px; color:rgba(255,255,255,0.7); font-size:0.9rem;">出力:
+                        ---px</span>
+                    <select class="setting-select sub-select" id="presetSizeSelect" style="display:none;">
+                        <option value="64">64px</option>
+                        <option value="128">128px</option>
+                        <option value="256">256px</option>
+                        <option value="512" selected>512px</option>
+                        <option value="1024">1024px</option>
+                        <option value="2048">2048px</option>
+                        <option value="4096">4096px</option>
+                    </select>
+                    <div class="custom-size-input" id="customSizeInput" style="display:none;">
                         <input type="number" id="customSizeValue" value="800" min="16" max="8192">
-                        <span>px × </span>
-                        <input type="number" id="customSizeValue2" value="800" min="16" max="8192" disabled>
-                        <span>px（正方形）</span>
+                        <span>px</span>
                     </div>
                 </div>
 
                 <!-- Format Settings -->
                 <div class="setting-group">
                     <label class="setting-label">📁 出力形式</label>
-                    <div class="format-options" id="formatOptions">
-                        <button class="format-option active" data-format="png">
-                            <span>PNG</span>
-                            <span class="format-badge">可逆</span>
-                        </button>
-                        <button class="format-option" data-format="jpeg">
-                            <span>JPG</span>
-                            <span class="format-badge">高圧縮</span>
-                        </button>
-                        <button class="format-option" data-format="webp">
-                            <span>WebP</span>
-                            <span class="format-badge">最新</span>
-                        </button>
-                        <button class="format-option" data-format="bmp">
-                            <span>BMP</span>
-                            <span class="format-badge">無圧縮</span>
-                        </button>
-                        <button class="format-option" data-format="ico">
-                            <span>ICO</span>
-                            <span class="format-badge">アイコン</span>
-                        </button>
-                    </div>
-                    <div class="quality-slider-wrapper" id="qualityWrapper">
+                    <select class="setting-select" id="formatSelect">
+                        <option value="png">PNG（可逆圧縮）</option>
+                        <option value="jpeg">JPG（高圧縮）</option>
+                        <option value="webp">WebP（最新）</option>
+                        <option value="bmp">BMP（無圧縮）</option>
+                        <option value="ico">ICO（アイコン）</option>
+                    </select>
+                    <div class="quality-slider-wrapper" id="qualityWrapper" style="display:none;">
                         <label class="option-label">品質: <span id="qualityValue">92</span>%</label>
                         <input type="range" class="quality-slider" id="qualitySlider" min="10" max="100" value="92">
                     </div>
                 </div>
-            </div>
-            <div class="output-info" id="outputInfo">
-                出力: オリジナルサイズ | PNG形式
             </div>
         </div>
 
@@ -773,10 +848,12 @@
         // State
         let originalImage = null;
         let currentMode = 'crop';
-        let cropState = { x: 0, y: 0, size: 100 };
+
+        // Unified crop state (PC + mobile)
+        let cropState = { x: 0, y: 0, scale: 1 };
         let isDragging = false;
-        let dragType = null;
-        let dragStart = { x: 0, y: 0 };
+        let dragStart = { x: 0, y: 0, cropX: 0, cropY: 0 };
+        let pinchStart = { distance: 0, scale: 1 };
 
         // Output settings state
         let outputSize = 'original';
@@ -794,14 +871,15 @@
         const ctx = outputCanvas.getContext('2d');
         const copyBtn = document.getElementById('copyBtn');
         const downloadBtn = document.getElementById('downloadBtn');
-        const cropBox = document.getElementById('cropBox');
-        const cropOverlay = document.getElementById('cropOverlay');
-        const cropContainer = document.getElementById('cropContainer');
+        const outputContainer = document.getElementById('outputContainer');
+        const cropFrame = document.getElementById('cropFrame');
+        const cropInfo = document.getElementById('cropInfo');
         const blurSlider = document.getElementById('blurAmount');
         const blurValue = document.getElementById('blurValue');
         const colorPicker = document.getElementById('bgColor');
         const colorValue = document.getElementById('colorValue');
         const toast = document.getElementById('toast');
+        const pasteBtn = document.getElementById('pasteBtn');
 
         // Initialize
         function init() {
@@ -830,6 +908,17 @@
             // Options
             blurSlider.addEventListener('input', () => {
                 blurValue.textContent = blurSlider.value + 'px';
+                if (originalImage) processImage();
+            });
+
+            // Crop zoom slider
+            const cropZoomSlider = document.getElementById('cropZoomSlider');
+            const cropZoomValue = document.getElementById('cropZoomValue');
+            cropZoomSlider.addEventListener('input', () => {
+                cropState.scale = cropZoomSlider.value / 100;
+                const displayScale = cropState.scale / 0.8;
+                cropZoomValue.textContent = displayScale.toFixed(1) + 'x';
+                clampCropState();
                 if (originalImage) processImage();
             });
 
@@ -875,31 +964,45 @@
                 eyedropperInfo.style.color = 'rgba(255, 200, 100, 0.8)';
             }
 
-            // Crop controls
-            cropBox.addEventListener('mousedown', startDrag);
-            document.querySelectorAll('.crop-handle').forEach(handle => {
-                handle.addEventListener('mousedown', (e) => {
-                    e.stopPropagation();
-                    startResize(e, handle.dataset.handle);
-                });
-            });
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', stopDrag);
+            // Unified crop controls (PC + Mobile)
+            outputContainer.addEventListener('mousedown', handleCropStart);
+            outputContainer.addEventListener('mousemove', handleCropMove);
+            outputContainer.addEventListener('mouseup', handleCropEnd);
+            outputContainer.addEventListener('mouseleave', handleCropEnd);
+            outputContainer.addEventListener('wheel', handleCropWheel, { passive: false });
 
             // Touch support
-            cropBox.addEventListener('touchstart', startDragTouch);
-            document.querySelectorAll('.crop-handle').forEach(handle => {
-                handle.addEventListener('touchstart', (e) => {
-                    e.stopPropagation();
-                    startResizeTouch(e, handle.dataset.handle);
-                });
-            });
-            document.addEventListener('touchmove', handleTouchMove);
-            document.addEventListener('touchend', stopDrag);
+            outputContainer.addEventListener('touchstart', handleCropStart, { passive: false });
+            outputContainer.addEventListener('touchmove', handleCropMove, { passive: false });
+            outputContainer.addEventListener('touchend', handleCropEnd);
 
             // Action buttons
             copyBtn.addEventListener('click', copyToClipboard);
             downloadBtn.addEventListener('click', downloadImage);
+
+            // Mobile paste button
+            pasteBtn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                try {
+                    const clipboardItems = await navigator.clipboard.read();
+                    for (const item of clipboardItems) {
+                        for (const type of item.types) {
+                            if (type.startsWith('image/')) {
+                                const blob = await item.getType(type);
+                                loadImage(blob);
+                                return;
+                            }
+                        }
+                    }
+                    showToast('クリップボードに画像がありません');
+                } catch (err) {
+                    showToast('クリップボードへのアクセスが拒否されました');
+                    console.error(err);
+                }
+            });
+
+            // Output settings
+            setupOutputSettings();
         }
 
         function handleFileSelect(e) {
@@ -942,8 +1045,9 @@
             reader.onload = (e) => {
                 originalImage = new Image();
                 originalImage.onload = () => {
+                    // Reset crop state for new image
+                    cropState = { x: 0, y: 0, scale: 0.8 };
                     showPreview();
-                    initCropBox();
                     processImage();
                 };
                 originalImage.src = e.target.result;
@@ -960,7 +1064,15 @@
             document.getElementById('actionButtons').classList.add('visible');
             copyBtn.disabled = false;
             downloadBtn.disabled = false;
-            updateOutputInfo();
+
+            // Show crop frame if in crop mode
+            if (currentMode === 'crop') {
+                cropFrame.classList.add('visible');
+                cropInfo.style.display = 'block';
+            } else {
+                cropFrame.classList.remove('visible');
+                cropInfo.style.display = 'none';
+            }
         }
 
         function setMode(mode) {
@@ -974,219 +1086,201 @@
             document.getElementById('blurOptions').style.display = mode === 'blur' ? 'block' : 'none';
             document.getElementById('colorOptions').style.display = mode === 'color' ? 'block' : 'none';
 
-            // Show/hide crop overlay
-            cropOverlay.style.display = mode === 'crop' ? 'block' : 'none';
+            // Show/hide crop frame
+            if (mode === 'crop') {
+                cropFrame.classList.add('visible');
+                cropInfo.style.display = 'block';
+                if (originalImage) {
+                    initCrop();
+                }
+            } else {
+                cropFrame.classList.remove('visible');
+                cropInfo.style.display = 'none';
+            }
 
             if (originalImage) processImage();
         }
 
-        function initCropBox() {
-            const imgRect = originalImg.getBoundingClientRect();
-            const displayWidth = originalImg.offsetWidth;
-            const displayHeight = originalImg.offsetHeight;
+        // ==================== Unified Crop System ====================
 
-            // Calculate initial square size (centered)
-            const size = Math.min(displayWidth, displayHeight);
-            const x = (displayWidth - size) / 2;
-            const y = (displayHeight - size) / 2;
-
-            cropState = { x, y, size };
-            updateCropBox();
-        }
-
-        function updateCropBox() {
-            cropBox.style.left = cropState.x + 'px';
-            cropBox.style.top = cropState.y + 'px';
-            cropBox.style.width = cropState.size + 'px';
-            cropBox.style.height = cropState.size + 'px';
-        }
-
-        function startDrag(e) {
-            isDragging = true;
-            dragType = 'move';
-            dragStart = { x: e.clientX - cropState.x, y: e.clientY - cropState.y };
-            e.preventDefault();
-        }
-
-        function startDragTouch(e) {
-            const touch = e.touches[0];
-            isDragging = true;
-            dragType = 'move';
-            dragStart = { x: touch.clientX - cropState.x, y: touch.clientY - cropState.y };
-            e.preventDefault();
-        }
-
-        function startResize(e, handle) {
-            isDragging = true;
-            dragType = 'resize-' + handle;
-            dragStart = {
-                mouseX: e.clientX,
-                mouseY: e.clientY,
-                cropX: cropState.x,
-                cropY: cropState.y,
-                size: cropState.size
-            };
-            e.preventDefault();
-        }
-
-        function startResizeTouch(e, handle) {
-            const touch = e.touches[0];
-            isDragging = true;
-            dragType = 'resize-' + handle;
-            dragStart = {
-                mouseX: touch.clientX,
-                mouseY: touch.clientY,
-                cropX: cropState.x,
-                cropY: cropState.y,
-                size: cropState.size
-            };
-            e.preventDefault();
-        }
-
-        function handleMouseMove(e) {
-            if (!isDragging) return;
-            handleMove(e.clientX, e.clientY);
-        }
-
-        function handleTouchMove(e) {
-            if (!isDragging) return;
-            const touch = e.touches[0];
-            handleMove(touch.clientX, touch.clientY);
-            e.preventDefault();
-        }
-
-        function handleMove(clientX, clientY) {
-            const displayWidth = originalImg.offsetWidth;
-            const displayHeight = originalImg.offsetHeight;
-
-            if (dragType === 'move') {
-                let newX = clientX - dragStart.x;
-                let newY = clientY - dragStart.y;
-
-                // Constrain within bounds
-                newX = Math.max(0, Math.min(newX, displayWidth - cropState.size));
-                newY = Math.max(0, Math.min(newY, displayHeight - cropState.size));
-
-                cropState.x = newX;
-                cropState.y = newY;
-            } else if (dragType.startsWith('resize-')) {
-                const handle = dragType.split('-')[1];
-                const dx = clientX - dragStart.mouseX;
-                const dy = clientY - dragStart.mouseY;
-
-                let newSize, newX, newY;
-                const minSize = 50;
-
-                // Use the average of dx and dy for uniform scaling
-                const delta = (Math.abs(dx) > Math.abs(dy)) ? dx : dy;
-
-                switch (handle) {
-                    case 'br':
-                        // Bottom-right: expand down-right
-                        newSize = dragStart.size + delta;
-                        newSize = Math.max(minSize, newSize);
-                        newSize = Math.min(newSize, displayWidth - dragStart.cropX);
-                        newSize = Math.min(newSize, displayHeight - dragStart.cropY);
-                        cropState.size = newSize;
-                        cropState.x = dragStart.cropX;
-                        cropState.y = dragStart.cropY;
-                        break;
-                    case 'bl':
-                        // Bottom-left: expand down-left
-                        newSize = dragStart.size - dx;
-                        newSize = Math.max(minSize, newSize);
-                        newX = dragStart.cropX + dragStart.size - newSize;
-                        if (newX >= 0 && dragStart.cropY + newSize <= displayHeight) {
-                            cropState.size = newSize;
-                            cropState.x = newX;
-                            cropState.y = dragStart.cropY;
-                        }
-                        break;
-                    case 'tr':
-                        // Top-right: expand up-right
-                        newSize = dragStart.size - dy;
-                        newSize = Math.max(minSize, newSize);
-                        newY = dragStart.cropY + dragStart.size - newSize;
-                        if (newY >= 0 && dragStart.cropX + newSize <= displayWidth) {
-                            cropState.size = newSize;
-                            cropState.x = dragStart.cropX;
-                            cropState.y = newY;
-                        }
-                        break;
-                    case 'tl':
-                        // Top-left: expand up-left
-                        newSize = dragStart.size - delta;
-                        newSize = Math.max(minSize, newSize);
-                        newX = dragStart.cropX + dragStart.size - newSize;
-                        newY = dragStart.cropY + dragStart.size - newSize;
-                        if (newX >= 0 && newY >= 0) {
-                            cropState.size = newSize;
-                            cropState.x = newX;
-                            cropState.y = newY;
-                        }
-                        break;
-                }
-            }
-
-            updateCropBox();
+        function initCrop() {
+            if (!originalImage) return;
+            // Initialize: scale 0.8 = image short edge fits crop frame (which is 80% of preview)
+            // x, y = offset from center (0 = centered)
+            cropState = { x: 0, y: 0, scale: 0.8 };
             processImage();
         }
 
-        function stopDrag() {
-            isDragging = false;
-            dragType = null;
+        function handleCropStart(e) {
+            if (!originalImage || currentMode !== 'crop') return;
+            e.preventDefault();
+            isDragging = true;
+
+            const point = e.touches ? e.touches[0] : e;
+            dragStart = {
+                x: point.clientX,
+                y: point.clientY,
+                cropX: cropState.x,
+                cropY: cropState.y
+            };
+
+            // Pinch zoom detection
+            if (e.touches && e.touches.length === 2) {
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                pinchStart = {
+                    distance: Math.sqrt(dx * dx + dy * dy),
+                    scale: cropState.scale
+                };
+            }
         }
+
+        function handleCropMove(e) {
+            if (!isDragging || !originalImage || currentMode !== 'crop') return;
+            e.preventDefault();
+
+            if (e.touches && e.touches.length === 2) {
+                // Pinch zoom
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const scaleChange = distance / pinchStart.distance;
+                cropState.scale = Math.max(0.8, Math.min(5, pinchStart.scale * scaleChange));
+            } else {
+                // Drag (single finger or mouse)
+                const point = e.touches ? e.touches[0] : e;
+                const dx = point.clientX - dragStart.x;
+                const dy = point.clientY - dragStart.y;
+
+                // Convert screen pixels to image pixels
+                const containerRect = outputContainer.getBoundingClientRect();
+                const minDim = Math.min(originalImage.width, originalImage.height);
+                const cropSize = minDim / cropState.scale;
+                const pixelRatio = cropSize / containerRect.width;
+
+                cropState.x = dragStart.cropX + dx * pixelRatio;
+                cropState.y = dragStart.cropY + dy * pixelRatio;
+            }
+
+            clampCropState();
+            updateCropZoomSlider();
+            processImage();
+        }
+
+        function handleCropEnd(e) {
+            isDragging = false;
+        }
+
+        function handleCropWheel(e) {
+            if (!originalImage || currentMode !== 'crop') return;
+            e.preventDefault();
+
+            const delta = e.deltaY > 0 ? 0.9 : 1.1;
+            cropState.scale = Math.max(0.8, Math.min(5, cropState.scale * delta));
+            clampCropState();
+            updateCropZoomSlider();
+            processImage();
+        }
+
+        function updateCropZoomSlider() {
+            const slider = document.getElementById('cropZoomSlider');
+            const value = document.getElementById('cropZoomValue');
+            if (slider && value) {
+                slider.value = Math.round(cropState.scale * 100);
+                const displayScale = cropState.scale / 0.8;
+                value.textContent = displayScale.toFixed(1) + 'x';
+            }
+        }
+
+        function clampCropState() {
+            // Clamp position so CROP FRAME (inner 80%) can reach image edges
+            const imgW = originalImage.width;
+            const imgH = originalImage.height;
+            const minDim = Math.min(imgW, imgH);
+            const cropSize = minDim / cropState.scale;
+
+            // The crop frame is 80% of canvas, inset by 10% on each side
+            // Allow canvas to extend beyond image so crop frame can reach edges
+            const frameInset = cropSize * 0.1;
+
+            const maxOffsetX = (imgW - cropSize) / 2 + frameInset;
+            const maxOffsetY = (imgH - cropSize) / 2 + frameInset;
+
+            cropState.x = Math.max(-maxOffsetX, Math.min(maxOffsetX, cropState.x));
+            cropState.y = Math.max(-maxOffsetY, Math.min(maxOffsetY, cropState.y));
+        }
+
+        // ==================== Image Processing ====================
 
         function processImage() {
             if (!originalImage) return;
 
+            switch (currentMode) {
+                case 'crop':
+                    processCrop();
+                    break;
+                case 'blur':
+                    processBlur();
+                    break;
+                case 'color':
+                    processColor();
+                    break;
+            }
+
+            // Update original size info display
+            updateOriginalSizeInfo();
+        }
+
+        function updateOriginalSizeInfo() {
+            const infoEl = document.getElementById('originalSizeInfo');
+            if (!infoEl || !originalImage) return;
+
+            let size;
+            if (currentMode === 'crop') {
+                // Actual crop size in image coordinates
+                const minDim = Math.min(originalImage.width, originalImage.height);
+                const actualCropSize = minDim / cropState.scale;
+                size = Math.round(actualCropSize * 0.8); // 80% is the crop frame
+            } else {
+                // For blur/color, it's the max dimension
+                size = Math.max(originalImage.width, originalImage.height);
+            }
+
+            infoEl.textContent = `出力: ${size}px`;
+        }
+
+        function processCrop() {
+            const imgW = originalImage.width;
+            const imgH = originalImage.height;
+            const minDim = Math.min(imgW, imgH);
+
+            // Canvas size is always minDim (fixed visual size)
+            const canvasSize = minDim;
+
+            // Crop size in image coordinates (zoomed in = smaller crop area)
+            const cropSize = minDim / cropState.scale;
+
+            // Center position with offset
+            const centerX = imgW / 2;
+            const centerY = imgH / 2;
+            const cropX = centerX - cropSize / 2 - cropState.x;
+            const cropY = centerY - cropSize / 2 - cropState.y;
+
+            outputCanvas.width = canvasSize;
+            outputCanvas.height = canvasSize;
+            // Draw the cropped region scaled to fill the fixed canvas
+            ctx.drawImage(originalImage, cropX, cropY, cropSize, cropSize, 0, 0, canvasSize, canvasSize);
+        }
+
+        function processBlur() {
             const imgWidth = originalImage.width;
             const imgHeight = originalImage.height;
             const size = Math.max(imgWidth, imgHeight);
 
             outputCanvas.width = size;
             outputCanvas.height = size;
-
             ctx.clearRect(0, 0, size, size);
 
-            switch (currentMode) {
-                case 'crop':
-                    processCrop(imgWidth, imgHeight, size);
-                    break;
-                case 'blur':
-                    processBlur(imgWidth, imgHeight, size);
-                    break;
-                case 'color':
-                    processColor(imgWidth, imgHeight, size);
-                    break;
-            }
-        }
-
-        function processCrop(imgWidth, imgHeight, size) {
-            const displayWidth = originalImg.offsetWidth;
-            const displayHeight = originalImg.offsetHeight;
-
-            // Convert display coordinates to image coordinates
-            const scaleX = imgWidth / displayWidth;
-            const scaleY = imgHeight / displayHeight;
-
-            const cropX = cropState.x * scaleX;
-            const cropY = cropState.y * scaleY;
-            const cropSize = cropState.size * Math.max(scaleX, scaleY);
-
-            // Adjust canvas size to match crop
-            const finalSize = Math.round(cropState.size * Math.max(scaleX, scaleY));
-            outputCanvas.width = finalSize;
-            outputCanvas.height = finalSize;
-
-            ctx.drawImage(
-                originalImage,
-                cropX, cropY, cropSize, cropSize,
-                0, 0, finalSize, finalSize
-            );
-        }
-
-        function processBlur(imgWidth, imgHeight, size) {
             const blurAmount = parseInt(blurSlider.value);
 
             // Draw blurred background
@@ -1213,7 +1307,14 @@
             ctx.drawImage(originalImage, fitX, fitY, fitWidth, fitHeight);
         }
 
-        function processColor(imgWidth, imgHeight, size) {
+        function processColor() {
+            const imgWidth = originalImage.width;
+            const imgHeight = originalImage.height;
+            const size = Math.max(imgWidth, imgHeight);
+
+            outputCanvas.width = size;
+            outputCanvas.height = size;
+
             // Fill background with color
             ctx.fillStyle = colorPicker.value;
             ctx.fillRect(0, 0, size, size);
@@ -1233,9 +1334,30 @@
             const finalCanvas = document.createElement('canvas');
             const finalCtx = finalCanvas.getContext('2d');
 
+            // For crop mode, only export the inner 80% (crop frame area)
+            let sourceX = 0;
+            let sourceY = 0;
+            let sourceSize = outputCanvas.width;
+
+            if (currentMode === 'crop') {
+                // Crop frame is 80% of canvas, inset by 10%
+                const inset = outputCanvas.width * 0.1;
+                sourceX = inset;
+                sourceY = inset;
+                sourceSize = outputCanvas.width * 0.8;
+            }
+
             let targetSize;
             if (outputSize === 'original') {
-                targetSize = outputCanvas.width;
+                if (currentMode === 'crop' && originalImage) {
+                    // Use actual crop size in image coordinates (not upscaled canvas size)
+                    const minDim = Math.min(originalImage.width, originalImage.height);
+                    const actualCropSize = minDim / cropState.scale;
+                    // The crop frame is 80% of the crop area
+                    targetSize = Math.round(actualCropSize * 0.8);
+                } else {
+                    targetSize = Math.round(sourceSize);
+                }
             } else if (outputSize === 'custom') {
                 targetSize = parseInt(document.getElementById('customSizeValue').value) || 800;
             } else {
@@ -1245,8 +1367,8 @@
             finalCanvas.width = targetSize;
             finalCanvas.height = targetSize;
 
-            // Draw the output canvas scaled to target size
-            finalCtx.drawImage(outputCanvas, 0, 0, targetSize, targetSize);
+            // Draw the cropped area scaled to target size
+            finalCtx.drawImage(outputCanvas, sourceX, sourceY, sourceSize, sourceSize, 0, 0, targetSize, targetSize);
 
             return finalCanvas;
         }
@@ -1304,83 +1426,58 @@
             showToast(`ダウンロードを開始しました！(${finalCanvas.width}×${finalCanvas.height}px, ${extension.toUpperCase()})`);
         }
 
-        // Update output info display
-        function updateOutputInfo() {
-            let sizeText;
-            if (outputSize === 'original') {
-                sizeText = `オリジナルサイズ (${outputCanvas.width || '---'}px)`;
-            } else if (outputSize === 'custom') {
-                const customSize = document.getElementById('customSizeValue').value || 800;
-                sizeText = `カスタム (${customSize}px)`;
-            } else {
-                sizeText = `${outputSize}px`;
-            }
-
-            const formatNames = {
-                'png': 'PNG (可逆圧縮)',
-                'jpeg': `JPG (品質${Math.round(outputQuality * 100)}%)`,
-                'webp': `WebP (品質${Math.round(outputQuality * 100)}%)`,
-                'bmp': 'BMP (無圧縮)',
-                'ico': 'ICO (アイコン)'
-            };
-
-            document.getElementById('outputInfo').textContent = `出力: ${sizeText} | ${formatNames[outputFormat]}`;
-        }
-
-        // Setup output settings event listeners
-        function setupOutputSettings() {
-            // Size options
-            document.querySelectorAll('.size-option').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.size-option').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    outputSize = btn.dataset.size;
-
-                    const customInput = document.getElementById('customSizeInput');
-                    if (outputSize === 'custom') {
-                        customInput.classList.add('visible');
-                    } else {
-                        customInput.classList.remove('visible');
-                    }
-                    updateOutputInfo();
-                });
-            });
-
-            // Custom size input
-            document.getElementById('customSizeValue').addEventListener('input', (e) => {
-                document.getElementById('customSizeValue2').value = e.target.value;
-                updateOutputInfo();
-            });
-
-            // Format options
-            document.querySelectorAll('.format-option').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.format-option').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    outputFormat = btn.dataset.format;
-
-                    const qualityWrapper = document.getElementById('qualityWrapper');
-                    if (outputFormat === 'jpeg' || outputFormat === 'webp') {
-                        qualityWrapper.classList.add('visible');
-                    } else {
-                        qualityWrapper.classList.remove('visible');
-                    }
-                    updateOutputInfo();
-                });
-            });
-
-            // Quality slider
-            document.getElementById('qualitySlider').addEventListener('input', (e) => {
-                outputQuality = parseInt(e.target.value) / 100;
-                document.getElementById('qualityValue').textContent = e.target.value;
-                updateOutputInfo();
-            });
-        }
-
         function showToast(message) {
             toast.textContent = message;
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Output settings setup
+        function setupOutputSettings() {
+            const sizeTypeSelect = document.getElementById('sizeTypeSelect');
+            const presetSizeSelect = document.getElementById('presetSizeSelect');
+            const customSizeInput = document.getElementById('customSizeInput');
+            const customSizeValue = document.getElementById('customSizeValue');
+            const formatSelect = document.getElementById('formatSelect');
+            const qualityWrapper = document.getElementById('qualityWrapper');
+            const qualitySlider = document.getElementById('qualitySlider');
+            const qualityValue = document.getElementById('qualityValue');
+            const originalSizeInfo = document.getElementById('originalSizeInfo');
+
+            function updateSizeUI() {
+                const type = sizeTypeSelect.value;
+                presetSizeSelect.style.display = type === 'preset' ? 'block' : 'none';
+                customSizeInput.style.display = type === 'custom' ? 'flex' : 'none';
+                originalSizeInfo.style.display = type === 'original' ? 'block' : 'none';
+
+                if (type === 'original') {
+                    outputSize = 'original';
+                } else if (type === 'preset') {
+                    outputSize = presetSizeSelect.value;
+                } else {
+                    outputSize = 'custom';
+                }
+            }
+
+            function updateFormatUI() {
+                outputFormat = formatSelect.value;
+                qualityWrapper.style.display = formatSelect.value === 'jpeg' ? 'block' : 'none';
+            }
+
+            sizeTypeSelect.addEventListener('change', updateSizeUI);
+            presetSizeSelect.addEventListener('change', () => {
+                outputSize = presetSizeSelect.value;
+            });
+
+            formatSelect.addEventListener('change', updateFormatUI);
+            qualitySlider.addEventListener('input', () => {
+                qualityValue.textContent = qualitySlider.value;
+                outputQuality = qualitySlider.value / 100;
+            });
+
+            // Initialize - show original size info by default
+            updateSizeUI();
+            updateFormatUI();
         }
 
         // Initialize
